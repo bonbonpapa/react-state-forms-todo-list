@@ -1,5 +1,19 @@
 import React, { Component } from 'react' 
 import { throws } from 'assert'
+
+class TodoList extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      listName: undefined,
+      allTodos:[],
+      allTodosArchieve: [],
+      userInput: "",
+      userInputTime: "",
+      userInputSearch: ""
+    }
+  }
+}
 class App extends Component { 
     constructor() { 
         super() 
@@ -10,7 +24,7 @@ class App extends Component {
             allTodosArchieve: [],
             allTodolists: [],
             userInput: "" ,
-            userInputDate: "",
+            userInputTime: "",
             userInputSearch: ""     
         } 
     } 
@@ -30,7 +44,7 @@ class App extends Component {
     }
     onDateHandler = event => {
         console.log("New string in input box ", event.target.value) 
-        this.setState({ userInputDate: event.target.value }) 
+        this.setState({ userInputTime: event.target.value }) 
     }
     submitHandler = event => { 
         console.log("Form submitted") 
@@ -38,9 +52,12 @@ class App extends Component {
    
         this.setState({ 
             userInput: "", 
-            userInputDate: "",
-            allTodos: this.state.allTodos.concat(this.state.userInput + " " + this.state.userInputDate),
-   
+            userInputTime: "",
+            allTodos: this.state.allTodos.concat(
+                {
+                    todo: this.state.userInput,
+                    dueTime: this.state.userInputTime
+                }   )
         }) 
     } 
     OnDeleteHandler = event => {
@@ -71,14 +88,14 @@ class App extends Component {
         console.log("Search item", this.state)
         this.setState(
             {   allTodosArchieve: this.state.allTodos,
-                allTodos : this.state.allTodos.filter(x =>  { return x.includes(this.state.userInputSearch)})}
+                allTodos : this.state.allTodos.filter(x =>  { return x.todo.includes(this.state.userInputSearch)})}
         )
     }
     OnDeleteSearchHandler = event => {
         console.log("Delete search item", this.state)
         this.setState(
             {
-                allTodos: this.state.allTodosArchieve.filter(x => { return !x.includes(this.state.userInputSearch)})
+                allTodos: this.state.allTodosArchieve.filter(x => { return !x.todo.includes(this.state.userInputSearch)})
             }
         )
     }
@@ -121,7 +138,7 @@ class App extends Component {
         return ( <div>
         <h1>{todos.listName}</h1> 
         <ul style = { {listStyleType: "decimal"}}> 
-            {todos.allTodos.map(x => (<li>{ (todos.allTodos.indexOf(x) + 1 ) + ' ' + x }</li>))} 
+            {todos.allTodos.map(x => (<li>{ (todos.allTodos.indexOf(x) + 1 ) + ' ' + x.todo + x.dueTime }</li>))} 
         </ul> 
         </div>
         )
@@ -131,61 +148,69 @@ class App extends Component {
         if (!this.state.listName) { 
             return (<div> loading ... </div>) 
         } 
-        return (<div> 
-                    
-            <h1>{this.state.listName}</h1> 
-            <ul style = { {listStyleType: "decimal"}}> 
-                {this.state.allTodos.map(x => (<li>{ (this.state.allTodos.indexOf(x) + 1 ) + ' ' + x }</li>))} 
-            </ul> 
+        return (
+          <div>
+            <h1>{this.state.listName}</h1>
+            <ul style={{ listStyleType: "decimal" }}>
+              {this.state.allTodos.map(x => (
+                <li>{(this.state.allTodos.indexOf(x) + 1) + " " + x.todo + x.dueTime}</li>
+              ))}
+            </ul>
 
-            { this.state.allTodolists.map(this.displayTodos)}
+            {this.state.allTodolists.map(this.displayTodos)}
 
-            <form onSubmit={this.submitHandler}> 
-                <input type="text" 
-                    onChange={this.onChangeHandler} 
-                    value={this.state.userInput} /> 
-                <input type="date" 
-                    onChange={this.onDateHandler} 
-                    value={this.state.userInputDate} required /> 
-                <input type="submit"></input>    
-                <button type="button" onClick = {this.OnDeleteHandler} >Clear</button>     
-             
-            </form> 
+            <form onSubmit={this.submitHandler}>
+              <input
+                type="text"
+                onChange={this.onChangeHandler}
+                value={this.state.userInput}
+              />
+              <input
+                type="time"
+                onChange={this.onDateHandler}
+                value={this.state.userInputTime}
+                required
+              />
+              <input type="submit"></input>
+              <button type="button" onClick={this.OnDeleteHandler}>
+                Clear
+              </button>
+              <button type="button" onClick={this.OnChangeTitleHandler}>
+                Change Title
+              </button>
+              <button type="button" onClick={this.OnChangeDeleteFirstHandler}>
+                Remove First
+              </button>
+              <button type="button" onClick={this.OnReverseHandler}>
+                Reverse
+              </button>
+              <button type="button" onClick={this.OnDeleteItemHandler}>
+                Delete todo
+              </button>
             <div>
-            <input type="submit"
-                onClick = {this.OnDeleteHandler} 
-                value = "Delete all messages"></input>
+              <input
+                type="text"
+                onChange={this.onChangeSeachHandler}
+                value={this.state.userInputSearch}
+              />
+              <button
+                type="button"
+                onClick={this.OnSearchHandler}
+                
+              >Search</button>
+              <button type= "button" onClick={this.OnDeleteSearchHandler}>
+                Delete search result
+              </button>
             </div>
-            <div>
-            <input type="submit"
-                onClick = {this.OnChangeTitleHandler} 
-                value = "Change list title"></input>
-            </div>
-            <div>
-            <input type="submit"
-                onClick = {this.OnChangeDeleteFirstHandler} 
-                value = "Delete the first message"></input>
-            </div>
-            <div>
-            <input type="submit"
-                onClick = {this.OnReverseHandler} 
-                value = "Reverse the list"></input>
-            </div>
-            <button onClick={this.OnDeleteItemHandler}>Delete todo</button>
-            <div>
-            <input type="text" 
-                    onChange={this.onChangeSeachHandler} 
-                    value={this.state.userInputSearch} /> 
-            <input type="submit"
-                onClick = {this.OnSearchHandler} 
-                value = "Search"></input>
-            <button onClick={this.OnDeleteSearchHandler}>Delete search result</button>
-            </div>
-            <div>
-                <button type="button" onClick={this.OnCreateNewList}>Add todo list</button>
-            </div>
+            </form>
             
-        </div>) 
+            <div>
+              <button type="button" onClick={this.OnCreateNewList}>
+                Add todo list
+              </button>
+            </div>
+          </div>
+        ); 
     } 
 } 
 export default App 
